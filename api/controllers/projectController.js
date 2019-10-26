@@ -57,8 +57,10 @@ router.put('/:id', async (req, res) => {
       res.status(400).send('project to update not found');
     }
 
-    if (await projectToUpdate.update(projectParams)) {
-      res.status(200).send({status: 'success'});
+    const result = await projectToUpdate.update(projectParams);
+    if (result && result['ok']) {
+      const projectUpdated = await Project.findById(id);
+      res.status(200).send(ProjectSerializer.serialize(projectUpdated));
     }
   } catch (err) {
     res.status(500).send(errorSerializer(500, err.errmsg));

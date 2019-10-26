@@ -1,0 +1,61 @@
+  <div class="container mt-2">
+  <div class="d-flex justify-content-between">
+    <h4>{{ editMode ? 'Edit' : 'Add' }} Project</h4>
+    <div class="custom-control custom-switch">
+      <input type="checkbox" class="custom-control-input" id="customSwitch1" [checked]="editMode" (change)="onUpdateMode(false)" [disabled]="!editMode">
+      <label class="custom-control-label" for="customSwitch1">{{ editMode ? 'Edit' : 'Add'}}</label>
+    </div>
+  </div>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="project-desc" class="col-form-label-sm">Project</label>
+      <input type="text" id="project-desc" formControlName="projectDescription" class="form-control" [class.border-danger]="onError('projectDescription')" />
+      <div *ngIf="onError('projectDescription')" class="text-danger small">{{ onError('projectDescription') }}</div>
+    </div>
+    <div class="form-group">
+      <div>
+        <label for="priority" class="col-form-label-sm">Priority:</label>
+        <span class="ml-2">{{ form.value.priority }}</span>
+      </div>
+      <input type="range" id="priority" formControlName="priority" class="form-control custom-range" min="0" max="30" step="1"/>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="start-date" class="col-form-label-sm">Start Date</label>
+        <div class="input-group">
+          <input type="text" id="start-date" [maxDate]="form.value.endDate" ngbDatepicker #start="ngbDatepicker"
+                 formControlName="startDate" (dateSelect)="onDateSelect($event, 'startDate')"
+                 class="form-control" [class.border-danger]="onError('startDate')" (click)="start.open()"/>
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary calendar" (click)="start.toggle()" type="button">
+              <fa-icon [icon]="faCalendar"></fa-icon></button>
+          </div>
+        </div>
+        <div *ngIf="onError('startDate')" class="text-danger small">{{ onError('startDate') }}</div>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="start-date" class="col-form-label-sm">End Date</label>
+        <div class="input-group">
+          <input type="text" id="end-date" [minDate]="form.value.startDate" ngbDatepicker #end_date="ngbDatepicker"
+                 formControlName="endDate" (dateSelect)="onDateSelect($event, 'endDate')"
+                 class="form-control" [class.border-danger]="onError('endDate')" (click)="end_date.open()"/>
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary calendar" (click)="end_date.toggle()" type="button">
+              <fa-icon [icon]="faCalendar"></fa-icon></button>
+          </div>
+        </div>
+        <div *ngIf="onError('endDate')" class="text-danger small">{{ onError('endDate') }}</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="manager" class="col-form-label-sm">Manager</label>
+      <input type="text" id="manager" formControlName="manager" class="form-control" [class.border-danger]="onError('manager')" />
+      <div *ngIf="onError('manager')" class="text-danger small">{{ onError('manager') }}</div>
+    </div>
+
+    <input type="submit" class="btn btn-primary mr-2" [disabled]="!form.valid" value="{{ editMode ? 'Update' : 'Create' }}"/>
+    <input type="button" class="btn btn-secondary" value="Reset" (click)="onReset()"/>
+  </form>
+</div>
