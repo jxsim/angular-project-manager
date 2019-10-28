@@ -16,6 +16,7 @@ import { ProjectNewComponent } from './project/new.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {HttpClientModule} from '@angular/common/http';
 import {ProjectFilterPipe} from './project/filter.pipe';
+import {ProjectSortPipe} from './project/sort.pipe';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import {ProjectFilterPipe} from './project/filter.pipe';
     ProjectComponent,
     UserComponent,
     ProjectNewComponent,
-    ProjectFilterPipe
+    ProjectFilterPipe,
+    ProjectSortPipe
   ],
   imports: [
     AppRoutingModule,

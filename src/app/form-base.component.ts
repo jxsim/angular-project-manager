@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { fetchFieldError } from './helpers/errors-helper';
 import {formatDate} from './helpers/date-helper';
-import Project from './models/project';
 
 @Component({
   selector: 'app-base',

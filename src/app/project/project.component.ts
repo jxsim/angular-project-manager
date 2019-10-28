@@ -16,10 +16,9 @@ export class ProjectComponent implements OnInit {
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
   projects: Project[];
-  searchProjectForm = this.fb.group({
-    projectDescription: [''],
-  });
+  search = '';
   projectToUpdate: Project;
+  sortEvent: string;
 
   constructor(private fb: FormBuilder, private projectService: ProjectService) {}
 
@@ -48,18 +47,23 @@ export class ProjectComponent implements OnInit {
   }
 
   onEdit(id) {
+    window.scrollTo(0, 0);
     this.projectToUpdate = Object.assign({}, this.projects.find(p => p.id === id));
   }
 
-  searchProject = (text$: Observable<string>) => {
+  onSort(sortEvent) {
+    this.sortEvent = sortEvent;
+  }
+
+  searchProject(text$: Observable<string>) {
     const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
     const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
     const inputFocus$ = this.focus$;
 
     return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(
-      map(term => (term === '' ? this.projects : this.projects.filter(project => project.projectDescription.includes(term))
-      )));
-  };
+      map(term => (term === '' ? this.projects : this.projects.filter(project => project.projectDescription.includes(term)))
+    ));
+  }
 
   searchProjectFormatter = (result: Project) => result.projectDescription;
 }
