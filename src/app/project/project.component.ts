@@ -1,10 +1,8 @@
-import {Component, OnChanges, OnInit, ViewChild} from '@angular/core';
-import {NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
-import {merge, Observable, Subject} from 'rxjs';
+import {Component, OnInit} from '@angular/core';
 import Project from '../models/project';
 import {FormBuilder} from '@angular/forms';
 import {ProjectService} from '../services/project.service';
-import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {API} from '../helpers/api-helper';
 
 @Component({
   selector: 'app-project',
@@ -12,13 +10,10 @@ import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
   styleUrls: ['./project.component.css']
 })
 export class ProjectComponent implements OnInit {
-  @ViewChild('instance', {static: true}) instance: NgbTypeahead;
-  focus$ = new Subject<string>();
-  click$ = new Subject<string>();
   projects: Project[];
-  search = '';
   projectToUpdate: Project;
   sortEvent: string;
+  search: string;
 
   constructor(private fb: FormBuilder, private projectService: ProjectService) {}
 
@@ -37,13 +32,14 @@ export class ProjectComponent implements OnInit {
   }
 
   getProjects(): void {
-    this.projectService.getProjects().subscribe(resp => {
+    const cb = resp => {
       if (resp) {
         this.projects = resp['data'].map(t => {
           return { id: t.id, ...t.attributes } as Project;
         });
       }
-    });
+    };
+    API.handleGetAll(this.projectService, cb);
   }
 
   onEdit(id) {
@@ -51,19 +47,18 @@ export class ProjectComponent implements OnInit {
     this.projectToUpdate = Object.assign({}, this.projects.find(p => p.id === id));
   }
 
+  onSuspend(id) {
+    const data = { id, isCompleted: true };
+    const cb = response => {
+      const updatedProject = { id: response["data"].id, ...response["data"].attributes } as Project;
+      console.log('updaet', updatedProject);
+      const project = this.projects.find(p => p.id === data.id);
+      Object.assign(project, updatedProject);
+    };
+    API.handleEnd(this.projectService, data, cb);
+  }
+
   onSort(sortEvent) {
     this.sortEvent = sortEvent;
   }
-
-  searchProject(text$: Observable<string>) {
-    const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
-    const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
-    const inputFocus$ = this.focus$;
-
-    return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(
-      map(term => (term === '' ? this.projects : this.projects.filter(project => project.projectDescription.includes(term)))
-    ));
-  }
-
-  searchProjectFormatter = (result: Project) => result.projectDescription;
 }

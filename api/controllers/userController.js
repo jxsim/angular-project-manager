@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const User = require('../models/project');
+const User = require('../models/user');
 const UserSerializer = require('../serializers/userSerializer');
 const errorSerializer = require('../serializers/errorSerializer');
 
 // index
 router.get('/', async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ isDeleted: false });
     res.status(200).send(UserSerializer.serialize(users));
   } catch (err) {
     res.status(500).send(errorSerializer(500, err.errmsg));
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const user = await User.findById(id)
+    const user = await User.findById(id);
     res.status(200).send(UserSerializer.serialize(user));
   } catch (err) {
     res.status(500).send(errorSerializer(500, err.errmsg));
@@ -56,9 +56,10 @@ router.put('/:id', async (req, res) => {
     if (!userToUpdate) {
       res.status(400).send('user to update not found');
     }
-
-    if (await userToUpdate.update(userParams)) {
-      res.status(200).send({status: 'success'});
+    const result =  await userToUpdate.update(userParams);
+    if (result && result['ok']) {
+      const userUpdated = await User.findById(id);
+      res.status(200).send(UserSerializer.serialize(userUpdated));
     }
   } catch (err) {
     res.status(500).send(err.errmsg);
@@ -71,12 +72,15 @@ router.delete('/:id', async (req, res) => {
     const id = req.params.id;
 
     const userToDelete = await User.findById(id);
-    if (!!userToDelete) {
-      if (await userToDelete.delete()) {
-        res.status(200).send({status: 'success'});
-      }
-    } else {
+
+    if (!userToDelete) {
       res.status(400).send('user to delete not found');
+    }
+
+    const result = await userToDelete.update({ isDeleted: true });
+    if (result && result['ok']) {
+      const userUpdated = await User.findById(id);
+      res.status(200).send(UserSerializer.serialize(userUpdated));
     }
   } catch (err) {
     res.status(500).send(err.errmsg);

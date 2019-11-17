@@ -12,11 +12,19 @@ const ProjectSchema = new mongoose.Schema({
   },
   startDate: {
     type: Date,
-    required: true
+    required: false
   },
   endDate: {
     type: Date,
-    required: true
+    required: false
+  },
+  isCompleted: {
+    type: Boolean,
+    default: false
+  },
+  manager: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }
 });
 

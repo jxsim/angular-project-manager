@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 
 const Project = require('../models/project');
+const User = require('../models/user');
 const ProjectSerializer = require('../serializers/projectSerializer');
 const errorSerializer = require('../serializers/errorSerializer');
 
 // index
 router.get('/', async (req, res) => {
   try {
-    const projects = await Project.find();
+    const projects = await Project.find().populate('manager');
     res.status(200).send(ProjectSerializer.serialize(projects));
   } catch (err) {
     res.status(500).send(errorSerializer(500, err.errmsg));
@@ -19,27 +20,32 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const project = await Project.findById(id)
+    const project = await Project.findById(id).populate('manager');
     res.status(200).send(ProjectSerializer.serialize(project));
   } catch (err) {
     res.status(500).send(errorSerializer(500, err.errmsg));
   }
 });
 
-
 // create
 router.post('/', async (req, res) => {
   try {
-    const permittedParams = ["projectDescription", "priority", "startDate", "endDate"];
+    const permittedParams = ["projectDescription", "priority", "startDate", "endDate", "manager"];
 
     const projectParams = Object.fromEntries(Object.entries(req.body).filter(_k => permittedParams.includes(_k[0])));
+    const manager = await User.findById(projectParams['manager']);
+    if (!manager) {
+      res.status(400).send(errorSerializer(400, 'Manager not found'));
+    }
 
-    const project = new Project(projectParams);
+    const project = new Project({ ...projectParams });
     const result = await project.save();
-    res.status(200).send(ProjectSerializer.serialize(result));
+    if (result) {
+      const projectCreated = await Project.findById(project.id).populate('manager');
+      res.status(200).send(ProjectSerializer.serialize(projectCreated));
+    }
 
   } catch (err) {
-    console.log('err', err);
     res.status(500).send(errorSerializer(500, err.errmsg));
   }
 });
@@ -47,19 +53,46 @@ router.post('/', async (req, res) => {
 // update
 router.put('/:id', async (req, res) => {
   try {
-    const permittedParams = ["projectDescription", "priority", "startDate", "endDate"];
+    const permittedParams = ["projectDescription", "priority", "startDate", "endDate", "manager"];
+
+    const id = req.params.id;
+    const projectParams = Object.fromEntries(Object.entries(req.body).filter(_k => permittedParams.includes(_k[0])));
+    const manager = await User.findById(projectParams['manager']);
+    if (!manager) {
+      res.status(400).send(errorSerializer(400, 'Manager not found'));
+    }
+
+    const projectToUpdate = await Project.findById(id);
+    if (!projectToUpdate) {
+      res.status(400).send(errorSerializer(400,'project to update not found'));
+    }
+
+    const result = await projectToUpdate.update(projectParams);
+    if (result && result['ok']) {
+      const projectUpdated = await Project.findById(id).populate('manager');
+      res.status(200).send(ProjectSerializer.serialize(projectUpdated));
+    }
+  } catch (err) {
+    res.status(500).send(errorSerializer(500, err.errmsg));
+  }
+});
+
+// end
+router.put('/:id/end', async (req, res) => {
+  try {
+    const permittedParams = ["isCompleted"];
 
     const id = req.params.id;
     const projectParams = Object.fromEntries(Object.entries(req.body).filter(_k => permittedParams.includes(_k[0])));
 
     const projectToUpdate = await Project.findById(id);
     if (!projectToUpdate) {
-      res.status(400).send('project to update not found');
+      res.status(400).send(errorSerializer(400,'project to update not found'));
     }
 
     const result = await projectToUpdate.update(projectParams);
     if (result && result['ok']) {
-      const projectUpdated = await Project.findById(id);
+      const projectUpdated = await Project.findById(id).populate('manager');
       res.status(200).send(ProjectSerializer.serialize(projectUpdated));
     }
   } catch (err) {

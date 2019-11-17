@@ -7,28 +7,33 @@ const TaskSchema = new mongoose.Schema({
   },
   priority: {
     type: Number,
-    required: true,
     min: 0
   },
   startDate: {
     type: Date,
-    required: true
   },
   endDate: {
     type: Date,
-    required: true
   },
   status: {
+    type: String,
+    required: true
+  },
+  isParent: {
     type: Boolean,
     default: false
   },
-  parentId: {
+  parentTask: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Task'
   },
-  projectId: {
+  project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project'
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
 });
 

@@ -15,20 +15,28 @@ import { ProjectNewComponent } from './project/new.component';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {HttpClientModule} from '@angular/common/http';
-import {ProjectFilterPipe} from './project/filter.pipe';
-import {ProjectSortPipe} from './project/sort.pipe';
+import {UserNewComponent} from './user/new.component';
+import {SortProjectPipe} from './project/sort-project.pipe';
+import {FilterProjectPipe} from './project/filter-project.pipe';
+import {SortUserPipe} from './user/sort-user.pipe';
+import {FilterUserPipe} from './user/filter-user.pipe';
+import {TaskNewComponent} from './task/new.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavComponent,
     FormBaseComponent,
+    TaskNewComponent,
     TaskComponent,
+    ProjectNewComponent,
     ProjectComponent,
     UserComponent,
-    ProjectNewComponent,
-    ProjectFilterPipe,
-    ProjectSortPipe
+    UserNewComponent,
+    SortProjectPipe,
+    FilterProjectPipe,
+    SortUserPipe,
+    FilterUserPipe
   ],
   imports: [
     AppRoutingModule,

@@ -1,9 +1,14 @@
 import {parseNgbDate} from './date-helper';
+import Project from '../models/project';
+import User from '../models/user';
 
-const filterByProjectDescription = (project, search) => {
+const filterByProjectDescription = (project: Project, search: string) => {
   return !!search ? project.projectDescription.includes(search) : true;
 };
 
+const filterByUserName = (user: User, search: string) => {
+  return !!search ? (user.firstName.includes(search) || user.lastName.includes(search)) : true;
+};
 
 const filterByStartDate = (task, startDate) => {
   if (!startDate || typeof startDate !== 'object') {
@@ -50,8 +55,9 @@ const filterByParentTask = (task, parentTask) => {
 
 
 const FILTERS = {
-  projectDescription: filterByProjectDescription
+  projectDescription: filterByProjectDescription,
+  userName: filterByUserName
 };
 
-export const filterPredicate = (filter, ...args) => t => FILTERS[filter](t, ...args);
+export const filterPredicate = (filter, search) => t => FILTERS[filter](t, search);
 

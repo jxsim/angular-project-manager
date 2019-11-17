@@ -1,0 +1,30 @@
+  <div class="container mt-2">
+  <div *ngIf="successMsg" class="alert alert-success" role="alert">{{ successMsg }}</div>
+  <div class="d-flex justify-content-between">
+    <h4>{{ editMode ? 'Edit' : 'Add' }} User</h4>
+    <div class="custom-control custom-switch">
+      <input type="checkbox" class="custom-control-input" id="customSwitch1" [checked]="editMode" (change)="onUpdateMode(false)" [disabled]="!editMode">
+      <label class="custom-control-label" for="customSwitch1">{{ editMode ? 'Edit' : 'Add'}}</label>
+    </div>
+  </div>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="first-name" class="col-form-label-sm">First Name</label>
+      <input type="text" id="first-name" formControlName="firstName" class="form-control" [class.border-danger]="onError('firstName')" />
+      <div *ngIf="onError('firstName')" class="text-danger small">{{ onError('firstName') }}</div>
+    </div>
+    <div class="form-group">
+      <label for="last-name" class="col-form-label-sm">Last Name</label>
+      <input type="text" id="last-name" formControlName="lastName" class="form-control" [class.border-danger]="onError('lastName')" />
+      <div *ngIf="onError('lastName')" class="text-danger small">{{ onError('lastName') }}</div>
+    </div>
+    <div class="form-group">
+      <label for="employee-id" class="col-form-label-sm">Employee ID</label>
+      <input type="text" id="employee-id" formControlName="employeeId" class="form-control" [class.border-danger]="onError('employeeId')" />
+      <div *ngIf="onError('employeeId')" class="text-danger small">{{ onError('employeeId') }}</div>
+    </div>
+
+    <input type="submit" class="btn btn-primary mr-2 btn-sm" [disabled]="!form.valid" value="{{ editMode ? 'Update' : 'Create' }}"/>
+    <input type="button" class="btn btn-secondary btn-sm" value="Reset" (click)="onReset()"/>
+  </form>
+</div>

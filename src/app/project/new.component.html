@@ -57,7 +57,11 @@
 
     <div class="form-group">
       <label for="manager" class="col-form-label-sm">Manager</label>
-      <input type="text" id="manager" formControlName="manager" class="form-control" [class.border-danger]="onError('manager')" />
+      <input type="text" id="manager" formControlName="manager" class="form-control"
+             [ngbTypeahead]="searchManager" [resultFormatter]="searchManagerFormatter"
+             [inputFormatter]="searchManagerFormatter"
+             (focus)="focus$.next($event.target.value)" (click)="click$.next($event.target.value)" #instance="ngbTypeahead"
+             [class.border-danger]="onError('manager')" />
       <div *ngIf="onError('manager')" class="text-danger small">{{ onError('manager') }}</div>
     </div>
 

@@ -13,14 +13,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  projectId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project'
-  },
-  taskId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Task'
-  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  }
 });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -1,1 +1,49 @@
-<p>task works!</p>
+<div class="container mt-2">
+  <h4>View Task</h4>
+  <div class="row mb-2">
+    <form class="form-group col-md-4">
+      <input type="text" id="search-task-desc" placeholder="Search..." name="search" [(ngModel)]="search" class="form-control" />
+    </form>
+    <div class="col-md-5 offset-md-3">
+      <div class="d-flex justify-content-md-between flex-wrap">
+        <label class="col-form-label-sm">Sort By:</label>
+        <button (click)="onSort('startDate')" class="btn btn-link btn-sm">Start Date</button>
+        <button (click)="onSort('endDate')" class="btn btn-link btn-sm">End Date</button>
+        <button (click)="onSort('priority')" class="btn btn-link btn-sm">Priority</button>
+        <button (click)="onSort('completed')" class="btn btn-link btn-sm">Completed</button>
+      </div>
+    </div>
+  </div>
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item" *ngFor="let t of tasks">
+      <div class="d-flex justify-content-between">
+        <div>
+          <h5>{{ t.taskDescription }}
+            <span class="badge badge-success ml-2">Completed</span>
+            <span *ngIf="t.isParent" class="badge badge-primary ml-2">Parent Task</span>
+          </h5>
+        </div>
+        <div>
+          <button class="btn btn-outline-secondary btn-sm" (click)="onEdit(t.id)">Edit</button>
+          <button class="btn btn-outline-secondary btn-sm ml-2" (click)="onEdit(t.id)">End Task</button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="col-md-3 col-sm-6">Project:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.project && t.project.projectDescription }}</span>
+      </div>
+      <div class="row">
+        <span class="col-md-3 col-sm-6">Parent Task:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.parentTask ? t.parentTask.taskDescription : 'nil' }}</span>
+      </div>
+      <div class="row">
+        <span class="col-md-3 col-sm-6">User:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.user && (t.user.firstName + ' ' + t.user.lastName) }}</span>
+      </div>
+      <div class="row">
+        <span class="col-md-3 col-sm-6">Priority:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.priority || 'nil' }}</span>
+      </div>
+      <div class="row">
+        <span class="col-md-3 col-sm-6">Start Date:</span><span class="col-md-3 col-sm-6 font-italic">{{ (t.startDate | date) || 'nil' }}</span>
+        <span class="col-md-3 col-sm-6">End Date:</span><span class="col-md-3 col-sm-6 font-italic">{{ (t.endDate | date) || 'nil' }}</span>
+      </div>
+    </li>
+  </ul>
+</div>

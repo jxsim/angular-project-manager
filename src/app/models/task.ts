@@ -1,11 +1,15 @@
-import {NgbDate} from '@ng-bootstrap/ng-bootstrap';
+import Project from './project';
+import User from './user';
 
 export default class Task {
   id: string;
   taskDescription: string;
   priority: number;
-  startDate: string | NgbDate;
-  endDate: string | NgbDate;
-  parentTask: string;
-  isEnded: boolean;
+  startDate: string;
+  endDate: string;
+  status: string;
+  isParent: boolean;
+  parentTask: Task | string;
+  project: Project | string;
+  user: User | string;
 }

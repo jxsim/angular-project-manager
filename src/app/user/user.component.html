@@ -1,1 +1,37 @@
-<p>user works!</p>
+<app-user-new (dataEvent)="onDataEvent($event)" [userToUpdate]="userToUpdate"></app-user-new>
+<div class="container mt-4">
+  <hr/>
+  <div class="row mb-2">
+    <form class="form-group col-md-4">
+      <input type="text" id="search-task-desc" placeholder="Search..." name="search" [(ngModel)]="search" class="form-control" />
+    </form>
+    <div class="col-md-4 offset-md-4">
+      <div class="d-flex justify-content-md-between flex-wrap">
+        <label class="col-form-label-sm">Sort By:</label>
+        <button (click)="onSort('firstName')" class="btn btn-link btn-sm">First Name</button>
+        <button (click)="onSort('lastName')" class="btn btn-link btn-sm">Last Name</button>
+        <button (click)="onSort('employeeId')" class="btn btn-link btn-sm">Id</button>
+      </div>
+    </div>
+  </div>
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item" *ngFor="let t of (users | filterUser:'userName':search | sortUser:sortEvent)">
+      <div class="d-flex justify-content-between">
+        <h5>{{ t.firstName }}</h5>
+        <div>
+          <button class="btn btn-outline-secondary btn-sm" (click)="onEdit(t.id)">Edit</button>
+          <button class="btn btn-outline-danger btn-sm ml-2" (click)="onDelete(t.id)">Delete</button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="col-md-3 col-sm-6">First Name:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.firstName }}</span>
+      </div>
+      <div class="row">
+        <span class="col-md-3 col-sm-6">Last Name:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.lastName }}</span>
+      </div>
+      <div class="row">
+        <span class="col-md-3 col-sm-6">Employee ID:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.employeeId }}</span>
+      </div>
+    </li>
+  </ul>
+</div>
