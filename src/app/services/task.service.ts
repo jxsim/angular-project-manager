@@ -37,7 +37,7 @@ export class TaskService {
   }
 
   end(task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.taskUrl}/${task.id}/end`, this.httpOptions)
+    return this.http.put<Task>(`${this.taskUrl}/${task.id}/end`, task, this.httpOptions)
       .pipe(catchError(this.handleError<Task>('endTask')));
   }
 

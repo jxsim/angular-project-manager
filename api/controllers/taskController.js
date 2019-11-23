@@ -80,11 +80,11 @@ router.post('/', async (req, res) => {
 // update
 router.put('/:id', async (req, res) => {
   try {
-    const permittedParams = ["taskDescription", "priority", "startDate", "endDate", "parentId"];
+    const permittedParams = ["taskDescription", "priority", "startDate", "endDate", "parentTask", "user"];
 
     const id = req.params.id;
     const taskParams = Object.fromEntries(Object.entries(req.body).filter(_k => permittedParams.includes(_k[0])));
-    const parentTaskId = taskParams['parentId'];
+    const parentTaskId = taskParams['parentTask'];
     if (!!parentTaskId) {
       const parentTask = await Task.findById(parentTaskId);
       if (!parentTask) {
@@ -94,11 +94,36 @@ router.put('/:id', async (req, res) => {
 
     const taskToUpdate = await Task.findById(id);
     if (!taskToUpdate) {
-      res.status(400).send('task to update not found');
+      res.status(400).send(errorSerializer(400, 'task to update not found'));
     }
 
-    if (await taskToUpdate.update(taskParams)) {
-      res.status(200).send({status: 'success'});
+    const result = await taskToUpdate.update(taskParams)
+    if (result && result['ok']) {
+      const task = await Task.findById(id).populate('parentTask').populate('project').populate('user');
+      res.status(200).send(TaskSerializer.serialize(task));
+    }
+  } catch (err) {
+    res.status(500).send(errorSerializer(500, err.errmsg));
+  }
+});
+
+// end task
+router.put('/:id/end', async (req, res) => {
+  try {
+    const permittedParams = ["status"];
+
+    const id = req.params.id;
+    const taskParams = Object.fromEntries(Object.entries(req.body).filter(_k => permittedParams.includes(_k[0])));
+
+    const taskToUpdate = await Task.findById(id);
+    if (!taskToUpdate) {
+      res.status(400).send(errorSerializer(400,'task to update not found'));
+    }
+
+    const result = await taskToUpdate.update(taskParams);
+    if (result && result['ok']) {
+      const task = await Task.findById(id).populate('parentTask').populate('project').populate('user');
+      res.status(200).send(TaskSerializer.serialize(task));
     }
   } catch (err) {
     res.status(500).send(errorSerializer(500, err.errmsg));

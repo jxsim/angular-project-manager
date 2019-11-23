@@ -1,14 +1,11 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import Project from '../models/project';
-import { FormBaseComponent } from '../form-base.component';
-import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons';
+import {FormBaseComponent} from '../form-base.component';
 import {ProjectService} from '../services/project.service';
-import { API } from '../helpers/api-helper';
-import {DATES, formatDate, parseNgbDate} from '../helpers/date-helper';
-import {merge, Observable, Subject} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
-import {NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
+import {API} from '../helpers/api-helper';
+import {parseNgbDate} from '../helpers/date-helper';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import User from '../models/user';
 import {UserService} from '../services/user.service';
 
@@ -18,35 +15,32 @@ import {UserService} from '../services/user.service';
   styleUrls: ['./project.component.css']
 })
 export class ProjectNewComponent extends FormBaseComponent implements OnInit, OnChanges {
-  @ViewChild('instance', {static: true}) instance: NgbTypeahead;
-  focus$ = new Subject<string>();
-  click$ = new Subject<string>();
-
-  faCalendar = faCalendarAlt;
   users: User[];
   form: FormGroup = this.fb.group({
     id: [''],
     projectDescription: ['', Validators.required],
     priority: [0],
-    startDate: [null, { disabled: true }],
-    endDate: [null, { disabled: true }],
+    startDate: [null, Validators.required],
+    endDate: [null, Validators.required],
     startEndDateCheck: [true],
     manager: ['', Validators.required],
   });
-  startDate: string = null;
-  endDate: string = null;
   editMode = false;
-  successMsg = '';
+  selectedUser: string;
+  searchUser: string;
+  defaultValues = {
+    priority: 0,
+    startEndDateCheck: true
+  };
 
   @Output() dataEvent = new EventEmitter();
   @Input() projectToUpdate: Project;
 
-  constructor(private fb: FormBuilder, private projectService: ProjectService, private userService: UserService) {
+  constructor(private fb: FormBuilder,
+              private projectService: ProjectService,
+              private userService: UserService,
+              private modalService: NgbModal) {
     super();
-  }
-
-  test() {
-    console.log('form', this.form.value);
   }
 
   onSubmit() {
@@ -81,10 +75,6 @@ export class ProjectNewComponent extends FormBaseComponent implements OnInit, On
   onUpdateMode(editMode) {
     this.editMode = editMode;
   }
-  showSuccessMessage(message: string) {
-    this.successMsg = message;
-    setInterval(() => this.successMsg = '', 5000);
-  }
 
   ngOnInit() {
     this.getUsers();
@@ -102,12 +92,6 @@ export class ProjectNewComponent extends FormBaseComponent implements OnInit, On
       });
     };
     API.handleGetAll(this.userService, cb);
-  }
-
-  setDefaultDateFields() {
-    this.form.patchValue({ startDate: DATES.defaultStartDate, endDate: DATES.defaultEndDate });
-    this.startDate = formatDate(DATES.defaultStartDate);
-    this.endDate = formatDate(DATES.defaultEndDate);
   }
 
   clearDateFields() {
@@ -129,17 +113,32 @@ export class ProjectNewComponent extends FormBaseComponent implements OnInit, On
     }
   }
 
-  searchManager = (text$: Observable<string>) => {
-    const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
-    const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
-    const inputFocus$ = this.focus$;
+  onSearchUser(userModal) {
+    if (this.form.value.manager) {
+      this.selectedUser = this.form.value.manager.id || this.form.value.manager._id;
+    }
+    this.modalType = 'manager';
+    this.open(userModal);
+  }
 
-    return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(
-      map(term => (term === '' ? this.users : this.users.filter(user => {
-          return user.lastName.includes(term) || user.firstName.includes(term) || (user.firstName + ' ' + user.lastName).includes(term);
-        }))
-      ));
-  };
+  onSelectUser(userId) {
+    if (this.selectedUser === userId) {
+      this.selectedUser = null;
+    } else {
+      this.selectedUser = userId;
+    }
+  }
 
-  searchManagerFormatter = (result: User) => result && (result.firstName + ' ' + result.lastName);
+  open(content) {
+    this.form.get('manager').markAsDirty();
+
+    const callback = () => {
+      if (this.modalType === 'manager') {
+        const manager = this.users.find(u => u.id === this.selectedUser);
+        this.form.patchValue({ manager });
+      }
+    };
+
+    this.openModal(this.modalService, content, callback);
+  }
 }

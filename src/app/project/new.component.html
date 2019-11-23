@@ -7,7 +7,7 @@
       <label class="custom-control-label" for="customSwitch1">{{ editMode ? 'Edit' : 'Add'}}</label>
     </div>
   </div>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" (change)="test()">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="project-desc" class="col-form-label-sm">Project</label>
       <input type="text" id="project-desc" formControlName="projectDescription" class="form-control" [class.border-danger]="onError('projectDescription')" />
@@ -57,15 +57,52 @@
 
     <div class="form-group">
       <label for="manager" class="col-form-label-sm">Manager</label>
-      <input type="text" id="manager" formControlName="manager" class="form-control"
-             [ngbTypeahead]="searchManager" [resultFormatter]="searchManagerFormatter"
-             [inputFormatter]="searchManagerFormatter"
-             (focus)="focus$.next($event.target.value)" (click)="click$.next($event.target.value)" #instance="ngbTypeahead"
-             [class.border-danger]="onError('manager')" />
+      <div class="input-group mb-3">
+        <input type="text" id="manager" [value]="form.value.manager ? (form.value.manager.firstName + ' ' + form.value.manager.lastName) : ''" class="form-control"
+               [class.border-danger]="onError('manager')" readonly />
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary" type="button" (click)="onSearchUser(userModal)">Search</button>
+        </div>
+      </div>
       <div *ngIf="onError('manager')" class="text-danger small">{{ onError('manager') }}</div>
     </div>
 
     <input type="submit" class="btn btn-primary mr-2 btn-sm" [disabled]="!form.valid" value="{{ editMode ? 'Update' : 'Create' }}"/>
     <input type="button" class="btn btn-secondary btn-sm" value="Reset" (click)="onReset()"/>
   </form>
+
+  <ng-template #userModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Search User</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form>
+        <div class="form-group">
+          <input type="text" id="search-user" placeholder="Search..." name="search" [(ngModel)]="searchUser" class="form-control" />
+        </div>
+      </form>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item" *ngFor="let t of (users | filterUser:'userName':searchUser)">
+          <div class="d-flex justify-content-between">
+            <div class="w-75">
+              <div class="row">
+                <span class="col-sm-6">Name:</span><span class="col-sm-6 font-italic">{{ t.firstName + ' ' + t.lastName }}</span>
+              </div>
+              <div class="row">
+                <span class="col-sm-6">Employee ID:</span><span class="col-sm-6 font-italic">{{ t.employeeId }}</span>
+              </div>
+            </div>
+            <button [ngClass]="['btn', 'btn-sm', this.selectedUser === t.id ? 'btn-primary' : 'btn-outline-primary']"
+                    (click)="onSelectUser(t.id)">Select</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Save</button>
+    </div>
+  </ng-template>
 </div>

@@ -34,7 +34,7 @@ export class ProjectComponent implements OnInit {
   getProjects(): void {
     const cb = resp => {
       if (resp) {
-        this.projects = resp['data'].map(t => {
+        this.projects = resp.data.map(t => {
           return { id: t.id, ...t.attributes } as Project;
         });
       }
@@ -50,8 +50,7 @@ export class ProjectComponent implements OnInit {
   onSuspend(id) {
     const data = { id, isCompleted: true };
     const cb = response => {
-      const updatedProject = { id: response["data"].id, ...response["data"].attributes } as Project;
-      console.log('updaet', updatedProject);
+      const updatedProject = { id: response.data.id, ...response.data.attributes } as Project;
       const project = this.projects.find(p => p.id === data.id);
       Object.assign(project, updatedProject);
     };

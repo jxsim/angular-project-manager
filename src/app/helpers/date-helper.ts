@@ -6,10 +6,14 @@ const ngbCalendar = new NgbCalendarGregorian();
 export const DATES = {
   defaultStartDate: ngbCalendar.getToday(),
   defaultEndDate: ngbCalendar.getNext(ngbCalendar.getToday())
-}
+};
 
-export function formatDate(date: NgbDateStruct) {
-  return `${date.year}-${date.month}-${date.day}`;
+export function formatDate(date: NgbDateStruct | string): string {
+  if (date instanceof NgbDate) {
+    return `${date.year}-${date.month}-${date.day}`;
+  } else if (typeof date === 'string') {
+    return date;
+  }
 }
 
 export function parseNgbDate(date) {

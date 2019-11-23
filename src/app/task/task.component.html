@@ -1,32 +1,23 @@
 <div class="container mt-2">
   <h4>View Task</h4>
-  <div class="row mb-2">
-    <form class="form-group col-md-4">
-      <input type="text" id="search-task-desc" placeholder="Search..." name="search" [(ngModel)]="search" class="form-control" />
-    </form>
-    <div class="col-md-5 offset-md-3">
-      <div class="d-flex justify-content-md-between flex-wrap">
-        <label class="col-form-label-sm">Sort By:</label>
-        <button (click)="onSort('startDate')" class="btn btn-link btn-sm">Start Date</button>
-        <button (click)="onSort('endDate')" class="btn btn-link btn-sm">End Date</button>
-        <button (click)="onSort('priority')" class="btn btn-link btn-sm">Priority</button>
-        <button (click)="onSort('completed')" class="btn btn-link btn-sm">Completed</button>
-      </div>
-    </div>
+  <div class="d-flex justify-content-between align-content-center mb-2">
+      <span>Viewing Project: {{ projectToFilter ? projectToFilter.projectDescription : 'all' }}</span>
+      <button class="btn btn-primary btn-sm" (click)="onSearchProject(projectModal)">Search</button>
   </div>
   <ul class="list-group list-group-flush">
-    <li class="list-group-item" *ngFor="let t of tasks">
+    <li class="list-group-item" *ngFor="let t of (tasks | filterTask:'taskByProject':(projectToFilter ? projectToFilter.id : ''))">
       <div class="d-flex justify-content-between">
-        <div>
-          <h5>{{ t.taskDescription }}
-            <span class="badge badge-success ml-2">Completed</span>
-            <span *ngIf="t.isParent" class="badge badge-primary ml-2">Parent Task</span>
-          </h5>
-        </div>
+        <h5>{{ t.taskDescription }}</h5>
         <div>
           <button class="btn btn-outline-secondary btn-sm" (click)="onEdit(t.id)">Edit</button>
-          <button class="btn btn-outline-secondary btn-sm ml-2" (click)="onEdit(t.id)">End Task</button>
+          <button class="btn btn-outline-secondary btn-sm ml-2" (click)="onEndTask(t.id)">End Task</button>
         </div>
+      </div>
+      <div class="row">
+        <span [ngClass]="['badge', 'ml-2', t.status === 'ended' ? 'badge-danger' : 'badge-warning']">
+            {{ t.status === 'ended' ? 'Completed' : 'Ongoing' }}
+          </span>
+        <span *ngIf="t.isParent" class="badge badge-primary ml-2">Parent Task</span>
       </div>
       <div class="row">
         <span class="col-md-3 col-sm-6">Project:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.project && t.project.projectDescription }}</span>
@@ -46,4 +37,39 @@
       </div>
     </li>
   </ul>
+
+  <ng-template #projectModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title-2">Search Project</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form>
+        <div class="form-group">
+          <input type="text" id="search-project" placeholder="Search..." name="search" [(ngModel)]="searchProject" class="form-control" />
+        </div>
+      </form>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item" *ngFor="let t of (projects | filterProject:'projectDescription':searchProject)">
+          <div class="d-flex justify-content-between">
+            <div class="w-75">
+              <div class="row">
+                <span class="col-sm-6">Project Description:</span><span class="col-sm-6 font-italic">{{ t.projectDescription }}</span>
+              </div>
+              <div class="row">
+                <span class="col-sm-6">Manager:</span><span class="col-sm-6 font-italic">{{ t.manager.firstName + ' ' + t.manager.lastName }}</span>
+              </div>
+            </div>
+            <button [ngClass]="['btn', 'btn-sm', this.selectedProject === t.id ? 'btn-primary' : 'btn-outline-primary']"
+                    (click)="onSelectProject(t.id)">Select</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Save</button>
+    </div>
+  </ng-template>
 </div>

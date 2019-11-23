@@ -1,6 +1,10 @@
+const handleGet = (service, id, cb) => {
+  service.get(id).subscribe(cb);
+};
+
 const handleGetAll = (service, cb) => {
   service.getAll().subscribe(cb);
-}
+};
 
 const handleCreate = (service, dataObject, cb) => {
   service.create(dataObject).subscribe(cb);
@@ -19,5 +23,5 @@ const handleDelete = (service, dataObject, cb) => {
 };
 
 export const API = {
-  handleGetAll, handleCreate, handleUpdate, handleEnd, handleDelete
+  handleGet, handleGetAll, handleCreate, handleUpdate, handleEnd, handleDelete
 };

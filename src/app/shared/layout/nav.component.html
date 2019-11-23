@@ -11,10 +11,10 @@
         <a class="nav-link" routerLink="users">User</a>
       </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <a class="nav-link" routerLink="tasks">Task</a>
+        <a class="nav-link" [routerLink]="['tasks','new']">Add Task</a>
       </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <a class="nav-link" routerLink="add_tasks">Add Task</a>
+        <a class="nav-link" routerLink="tasks">Task</a>
       </li>
     </ul>
   </div>

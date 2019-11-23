@@ -20,14 +20,16 @@
     <li class="list-group-item" *ngFor="let t of (projects | filterProject:'projectDescription':search | sortProject:sortEvent )">
       <div class="d-flex justify-content-between">
         <h5>{{ t.projectDescription }}
-          <span [ngClass]="['badge', 'ml-2', t.isCompleted ? 'badge-success' : 'badge-warning']">
-            {{ t.isCompleted ? 'Completed' : 'Ongoing' }}
-          </span>
         </h5>
         <div>
           <button class="btn btn-outline-secondary btn-sm" [disabled]="t.isCompleted" (click)="onEdit(t.id)">Edit</button>
           <button class="btn btn-outline-danger btn-sm ml-2" [disabled]="t.isCompleted" (click)="onSuspend(t.id)">Suspend</button>
         </div>
+      </div>
+      <div class="row">
+        <span [ngClass]="['badge', 'ml-2', t.isCompleted ? 'badge-danger' : 'badge-warning']">
+          {{ t.isCompleted ? 'Completed' : 'Ongoing' }}
+        </span>
       </div>
       <div class="row">
         <span class="col-md-3 col-sm-6">Priority:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.priority }}</span>
@@ -36,7 +38,7 @@
         <span class="col-md-3 col-sm-6">Manager:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.manager.firstName + ' ' + t.manager.lastName }}</span>
       </div>
       <div class="row">
-        <span class="col-md-3 col-sm-6">No. of Tasks:</span><span class="col-md-3 col-sm-6 font-italic">{{ 0 }}</span>
+        <span class="col-md-3 col-sm-6">No. of Tasks:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.taskCount }}</span>
       </div>
       <div class="row">
         <span class="col-md-3 col-sm-6">Start Date:</span><span class="col-md-3 col-sm-6 font-italic">{{ t.startDate | date }}</span>

@@ -21,6 +21,8 @@ import {FilterProjectPipe} from './project/filter-project.pipe';
 import {SortUserPipe} from './user/sort-user.pipe';
 import {FilterUserPipe} from './user/filter-user.pipe';
 import {TaskNewComponent} from './task/new.component';
+import {FilterTaskPipe} from './task/filter-task.pipe';
+import {TaskEditComponent} from './task/edit.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +38,9 @@ import {TaskNewComponent} from './task/new.component';
     SortProjectPipe,
     FilterProjectPipe,
     SortUserPipe,
-    FilterUserPipe
+    FilterUserPipe,
+    FilterTaskPipe,
+    TaskEditComponent
   ],
   imports: [
     AppRoutingModule,

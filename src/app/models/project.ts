@@ -6,6 +6,7 @@ export default class Project {
   priority: number;
   startDate: string;
   endDate: string;
+  taskCount: number;
   isCompleted: boolean;
   manager: User | string;
 }

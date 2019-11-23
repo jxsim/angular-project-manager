@@ -1,17 +1,12 @@
 <div class="container my-2">
   <div *ngIf="successMsg" class="alert alert-success" role="alert">{{ successMsg }}</div>
-  <h4>Add Task</h4>
+  <h4>Edit Task</h4>
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="project" class="col-form-label-sm">Project</label>
       <div class="input-group mb-3">
-        <input type="text" id="project" [value]="form.value.project ? form.value.project.projectDescription : ''" class="form-control"
-               [class.border-danger]="onError('project')" readonly />
-        <div class="input-group-append">
-          <button class="btn btn-outline-secondary" type="button" (click)="onSearchProject(projectModal)">Search</button>
-        </div>
+        <input type="text" id="project" [value]="projectDescription" class="form-control"readonly />
       </div>
-      <div *ngIf="onError('project')" class="text-danger small">{{ onError('project') }}</div>
     </div>
 
     <div class="form-group">
@@ -21,7 +16,7 @@
     </div>
 
     <div class="form-group mb-2">
-      <input id="parent-task-check" type="checkbox" formControlName="isParent">
+      <input id="parent-task-check" type="checkbox" [checked]="isParent" disabled>
       <label for="parent-task-check" class="col-form-label-sm ml-2">Parent Task</label>
     </div>
 
@@ -86,7 +81,7 @@
       <div *ngIf="onError('user')" class="text-danger small">{{ onError('user') }}</div>
     </div>
 
-    <input type="submit" class="btn btn-primary mr-2 btn-sm" [disabled]="!form.valid" value="Create"/>
+    <input type="submit" class="btn btn-primary mr-2 btn-sm" [disabled]="!form.valid" value="Update"/>
     <input type="button" class="btn btn-secondary btn-sm" value="Reset" (click)="onReset()"/>
   </form>
 
@@ -116,41 +111,6 @@
             </div>
             <button [ngClass]="['btn', 'btn-sm', this.selectedUser === t.id ? 'btn-primary' : 'btn-outline-primary']"
                     (click)="onSelectUser(t.id)">Select</button>
-          </div>
-        </li>
-      </ul>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Save</button>
-    </div>
-  </ng-template>
-
-  <ng-template #projectModal let-modal>
-    <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title-2">Search Project</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body">
-      <form>
-        <div class="form-group">
-          <input type="text" id="search-project" placeholder="Search..." name="search" [(ngModel)]="searchProject" class="form-control" />
-        </div>
-      </form>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item" *ngFor="let t of (projects | filterProject:'projectDescription':searchProject)">
-        <div class="d-flex justify-content-between">
-            <div class="w-75">
-              <div class="row">
-                <span class="col-sm-6">Project Description:</span><span class="col-sm-6 font-italic">{{ t.projectDescription }}</span>
-              </div>
-              <div class="row">
-                <span class="col-sm-6">Manager:</span><span class="col-sm-6 font-italic">{{ t.manager.firstName + ' ' + t.manager.lastName }}</span>
-              </div>
-            </div>
-            <button [ngClass]="['btn', 'btn-sm', this.selectedProject === t.id ? 'btn-primary' : 'btn-outline-primary']"
-                    (click)="onSelectProject(t.id)">Select</button>
           </div>
         </li>
       </ul>

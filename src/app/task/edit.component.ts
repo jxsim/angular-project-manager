@@ -3,6 +3,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import Task from '../models/task';
 import {FormBaseComponent} from '../form-base.component';
 import {API} from '../helpers/api-helper';
+import {parseNgbDate} from '../helpers/date-helper';
 import {TaskService} from '../services/task.service';
 import {NgbModal, NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
 import {merge, Observable, Subject} from 'rxjs';
@@ -11,14 +12,14 @@ import User from '../models/user';
 import Project from '../models/project';
 import {ProjectService} from '../services/project.service';
 import {UserService} from '../services/user.service';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
-  selector: 'app-task-new',
-  templateUrl: './new.component.html',
+  selector: 'app-task-edit',
+  templateUrl: './edit.component.html',
   styleUrls: ['./task.component.css']
 })
-export class TaskNewComponent extends FormBaseComponent implements OnInit {
+export class TaskEditComponent extends FormBaseComponent implements OnInit {
   @ViewChild('instance', {static: true}) instance: NgbTypeahead;
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
@@ -32,33 +33,28 @@ export class TaskNewComponent extends FormBaseComponent implements OnInit {
     priority: [0],
     startDate: [null, Validators.required],
     endDate: [null, Validators.required],
-    isParent: [false],
     parentTask: [''],
-    project: ['', Validators.required],
-    user: ['', Validators.required],
+    user: [''],
   });
-  defaultValues = {
-    priority: 0
-  };
   searchUser: string;
-  searchProject: string;
   selectedUser: string;
-  selectedProject: string;
+  task: Task;
+  isParent: boolean;
+  projectDescription: string;
 
   constructor(private fb: FormBuilder,
+              private route: ActivatedRoute,
+              private router: Router,
               private taskService: TaskService,
               private projectService: ProjectService,
-              private router: Router,
               private userService: UserService,
               private modalService: NgbModal) {
     super();
   }
 
   onSubmit() {
-    if (this.form.value.isParent) {
-      this.clearNonParentTaskFields();
-    }
-    this.onCreate();
+    console.log('w', this.form.value);
+    this.onUpdate();
   }
 
   onReset() {
@@ -66,33 +62,65 @@ export class TaskNewComponent extends FormBaseComponent implements OnInit {
     this.setDefaultDateFields();
   }
 
-  onCreate() {
-    const { taskDescription, priority, parentTask, project, user, isParent} = this.form.value;
-    const task = { taskDescription, priority, isParent, project: project && project.id,
-      user: user && user.id, parentTask: parentTask && parentTask.id, startDate: this.startDate, endDate: this.endDate } as Task;
+  onUpdate() {
+    let taskToUpdate;
+    const { id, taskDescription, priority, parentTask, user } = this.form.value;
+    if (this.isParent) {
+      taskToUpdate = {
+        id, taskDescription, priority, user: user && user.id
+      } as Task;
+    } else {
+      taskToUpdate = {
+        id, taskDescription, priority, user: user && user.id,
+        parentTask: parentTask && parentTask.id, startDate: this.startDate, endDate: this.endDate
+      } as Task;
+    }
     const cb = response => {
-      this.showSuccessMessage('Successfully created the task!');
-      this.router.navigate(['task']);
+      console.log('what is resp', response);
+      this.router.navigate(['tasks']);
     };
-    API.handleCreate(this.taskService, task, cb);
+    API.handleUpdate(this.taskService, taskToUpdate, cb);
   }
 
   ngOnInit() {
+    this.route.params.subscribe(routeParams => this.getTask(routeParams.id));
     this.getTasks();
     this.getProjects();
     this.getUsers();
-    this.setDefaultDateFields();
-    this.form.get('isParent').valueChanges.subscribe(checked => {
-      const controlsToUpdate = [this.form.get('startDate'), this.form.get('endDate'), this.form.get('parentTask'),
-        this.form.get('priority')];
-      controlsToUpdate.forEach(control => { checked ? control.disable() : control.enable(); });
-    });
+  }
+
+  getTask(taskId: string): void {
+    const cb = resp => {
+      if (resp) {
+        const data = resp.data;
+        this.task = { id: data.id, ... data.attributes } as Task;
+        const { id, taskDescription, isParent, priority, parentTask, startDate, endDate, user} = this.task;
+        this.defaultValues = { ...this.task, startDate: parseNgbDate(startDate), endDate: parseNgbDate(endDate) };
+        const project = this.task.project as Project;
+        this.isParent = isParent;
+
+        const controlsToUpdate = [this.form.get('startDate'), this.form.get('endDate'), this.form.get('parentTask'),
+          this.form.get('priority')];
+        if (isParent) {
+          this.form.patchValue({ id, taskDescription, user });
+          controlsToUpdate.forEach(control => control.disable());
+        } else {
+          this.form.patchValue({ id, taskDescription, priority, parentTask,
+            startDate: parseNgbDate(startDate), endDate: parseNgbDate(endDate), user });
+          this.startDate = startDate;
+          this.endDate = endDate;
+          controlsToUpdate.forEach(control => control.enable());
+        }
+        this.projectDescription = project.projectDescription;
+      }
+    };
+    API.handleGet(this.taskService, taskId, cb);
   }
 
   getTasks(): void {
     const cb = resp => {
       if (resp) {
-        this.tasks = resp['data'].filter(t => t.attributes["isParent"]).map(t => {
+        this.tasks = resp.data.filter(t => t.attributes.isParent).map(t => {
           return { id: t.id, ...t.attributes } as Task;
         });
       }
@@ -103,7 +131,7 @@ export class TaskNewComponent extends FormBaseComponent implements OnInit {
   getProjects() {
     const cb = resp => {
       if (resp) {
-        this.projects = resp['data'].map(t => {
+        this.projects = resp.data.map(t => {
           return { id: t.id, ...t.attributes } as Project;
         });
       }
@@ -113,17 +141,11 @@ export class TaskNewComponent extends FormBaseComponent implements OnInit {
 
   getUsers(): void {
     const cb = (resp) => {
-      this.users = resp['data'].map(t => {
+      this.users = resp.data.map(t => {
         return { id: t.id, ...t.attributes } as User;
       });
     };
     API.handleGetAll(this.userService, cb);
-  }
-
-  clearNonParentTaskFields() {
-    this.form.patchValue({ startDate: '', endDate: '', priority: '', parentTask: '' });
-    this.startDate = null;
-    this.endDate = null;
   }
 
   searchParentTask = (text$: Observable<string>) => {
@@ -132,8 +154,8 @@ export class TaskNewComponent extends FormBaseComponent implements OnInit {
     const inputFocus$ = this.focus$;
 
     return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(
-      map(term => (term === '' ? this.tasks : this.tasks.filter(task => {
-          return task.taskDescription.includes(term);
+      map(term => (term === '' ? this.tasks : this.tasks.filter(t => {
+          return t.taskDescription.includes(term);
         }))
       ));
   };
@@ -148,14 +170,6 @@ export class TaskNewComponent extends FormBaseComponent implements OnInit {
     this.open(userModal);
   }
 
-  onSearchProject(projectModal) {
-    if (this.form.value.project) {
-      this.selectedProject = this.form.value.project.id || this.form.value.project._id;
-    }
-    this.modalType = 'project';
-    this.open(projectModal);
-  }
-
   onSelectUser(userId) {
     if (this.selectedUser === userId) {
       this.selectedUser = null;
@@ -164,22 +178,12 @@ export class TaskNewComponent extends FormBaseComponent implements OnInit {
     }
   }
 
-  onSelectProject(projectId) {
-    if (this.selectedProject === projectId) {
-      this.selectedProject = null;
-    } else {
-      this.selectedProject = projectId;
-    }
-  }
-
   open(content) {
     const callback = () => {
       if (this.modalType === 'user') {
         const user = this.users.find(u => u.id === this.selectedUser);
+        console.log('what sae user', user);
         this.form.patchValue({ user });
-      } else if (this.modalType === 'project') {
-        const project = this.projects.find(p => p.id === this.selectedProject);
-        this.form.patchValue({ project });
       }
     };
 
