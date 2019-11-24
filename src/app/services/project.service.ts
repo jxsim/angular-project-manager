@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Observable, of} from 'rxjs';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {catchError} from 'rxjs/operators';
 import Project from '../models/project';
 
 @Injectable({
@@ -21,7 +21,7 @@ export class ProjectService {
       .pipe(catchError(this.handleError<Project[]>('getProjects', [])));
   }
 
-  getProject(id: string): Observable<Project> {
+  get(id: string): Observable<Project> {
     return this.http.get<Project>(`${this.projectUrl}/${id}`)
       .pipe(catchError(this.handleError<Project>('getProject')));
   }
@@ -41,7 +41,7 @@ export class ProjectService {
       .pipe(catchError(this.handleError<Project>('endProject')));
   }
 
-  deleteProject(project: Project): Observable<Project> {
+  delete(project: Project): Observable<Project> {
     return this.http.delete<Project>(`${this.projectUrl}/${project.id}`, this.httpOptions)
       .pipe(catchError(this.handleError<Project>('deleteProject')));
   }

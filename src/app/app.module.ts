@@ -23,6 +23,7 @@ import {FilterUserPipe} from './user/filter-user.pipe';
 import {TaskNewComponent} from './task/new.component';
 import {FilterTaskPipe} from './task/filter-task.pipe';
 import {TaskEditComponent} from './task/edit.component';
+import {ProjectService} from './services/project.service';
 
 @NgModule({
   declarations: [

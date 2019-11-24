@@ -16,7 +16,7 @@
       <div class="row">
         <span [ngClass]="['badge', 'ml-2', t.status === 'ended' ? 'badge-danger' : 'badge-warning']">
             {{ t.status === 'ended' ? 'Completed' : 'Ongoing' }}
-          </span>
+        </span>
         <span *ngIf="t.isParent" class="badge badge-primary ml-2">Parent Task</span>
       </div>
       <div class="row">
