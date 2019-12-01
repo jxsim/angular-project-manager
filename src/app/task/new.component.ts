@@ -72,7 +72,7 @@ export class TaskNewComponent extends FormBaseComponent implements OnInit {
       user: user && user.id, parentTask: parentTask && parentTask.id, startDate: this.startDate, endDate: this.endDate } as Task;
     const cb = response => {
       this.showSuccessMessage('Successfully created the task!');
-      this.router.navigate(['task']);
+      this.router.navigate(['tasks']);
     };
     API.handleCreate(this.taskService, task, cb);
   }
